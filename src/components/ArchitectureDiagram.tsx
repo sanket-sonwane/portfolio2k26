@@ -25,6 +25,8 @@ export function ArchitectureDiagram({
               <Reveal delay={Math.min(i * 0.04, 0.3)} className="flex w-full justify-center">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
+                  data-cursor="node"
+                  data-cursor-label={n.label}
                   className={`max-w-full rounded-lg border border-border bg-surface px-4 py-2 text-center font-mono tracking-[0.12em] text-primary ${
                     compact ? "text-[11px]" : "text-xs"
                   }`}

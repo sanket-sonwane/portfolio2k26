@@ -173,6 +173,7 @@ export function PlaygroundChat() {
               key={s}
               type="button"
               onClick={() => send(s)}
+              data-cursor-label={`Ask: ${s}`}
               className="rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] text-secondary transition-colors hover:border-accent/30 hover:text-accent"
             >
               {s}
@@ -203,6 +204,7 @@ export function PlaygroundChat() {
             onClick={() => send(input)}
             disabled={!input.trim() || thinking}
             aria-label="Send message"
+            data-cursor-label="Send"
             className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-white transition-opacity disabled:opacity-40"
           >
             <Send className="size-4" />

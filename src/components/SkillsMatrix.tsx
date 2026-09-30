@@ -55,6 +55,7 @@ export function SkillsMatrix() {
                             }
                           }}
                           aria-expanded={linked ? isActive : undefined}
+                          data-cursor={linked ? undefined : "muted"}
                           className={`rounded-full border px-3 py-1.5 font-mono text-xs transition-colors ${
                             isActive
                               ? "border-accent bg-accent text-white"

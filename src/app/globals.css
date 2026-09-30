@@ -83,6 +83,247 @@ a {
   border-top: 1px solid var(--border);
 }
 
+/* ------------------------------------------------------------------ *
+ * Ignition cursor
+ *
+ * `.has-custom-cursor` is added by <Cursor /> on mount, only for
+ * `(hover: hover) and (pointer: fine)` pointers. Until that class lands
+ * the native cursor stays visible, so there is never a frame where the
+ * pointer is hidden but the replacement has not mounted.
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* Additive light needs a dark backdrop to add onto. On light themes the
+     same bloom is multiplied instead, which reads as a warm lens flare. */
+  --cursor-blend: multiply;
+  --cursor-heat-rgb: 255 92 53;
+}
+
+.dark {
+  --cursor-blend: screen;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /*
+   * Two rules, not one. The UA sheet declares `cursor: pointer` on `a` and
+   * `cursor: default` on `button`, and a cascaded declaration always beats
+   * inheritance — so hiding the cursor on <html> alone would leave a native
+   * arrow on every link and button. Each element that can be a hotspot needs
+   * its own declaration.
+   *
+   * Specificity is deliberately kept at one element selector so Tailwind's
+   * `cursor-*` utilities still win, letting an element opt back in.
+   */
+  :where(html.has-custom-cursor),
+  :where(html.has-custom-cursor)
+    :is(
+      a,
+      button,
+      summary,
+      details,
+      label[for],
+      [role="button"],
+      [role="link"],
+      [role="tab"],
+      [role="menuitem"],
+      [role="switch"],
+      [tabindex]:not([tabindex="-1"])
+    ) {
+    cursor: none;
+  }
+
+  /* Precise caret targeting wins over the effect — you need to see where the
+     text cursor actually is before you can click into a field. Non-text inputs
+     (submit, checkbox, range…) stay on the rule above, since they are buttons. */
+  :where(html.has-custom-cursor)
+    :is(
+      input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+      textarea,
+      select,
+      [contenteditable]:not([contenteditable="false"])
+    ) {
+    cursor: auto;
+  }
+}
+
+.cursor-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: clip;
+  pointer-events: none;
+  /* SSR default: the layers are laid out at 0,0 at full opacity until JS
+     mounts, and the first rAF flips this to `visible`. Prevents a flash of
+     glow in the top-left corner on slow loads. */
+  visibility: hidden;
+  /* Intentionally no `opacity` and no `will-change` here: both would create
+     an isolated group and stop the blended glow layers from blending with the
+     page. Master alpha is applied per layer instead. */
+}
+
+.cursor-pool,
+.cursor-streak,
+.cursor-shock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  mix-blend-mode: var(--cursor-blend);
+  will-change: transform, opacity;
+}
+
+/* Must span the viewport: a blended element's group is its own box, so a
+   shrink-wrapped container would stop the sparks from blending with the page.
+   The container is the blend context; the sparks inside share it. */
+.cursor-trail {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: var(--cursor-blend);
+}
+
+/* Wide cool bloom — the torch you are carrying, not a sticker on the pointer */
+.cursor-pool {
+  opacity: 0;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(
+    circle closest-side,
+    rgb(var(--cursor-heat-rgb) / 0.26) 0%,
+    rgb(var(--cursor-heat-rgb) / 0.12) 26%,
+    rgb(var(--cursor-heat-rgb) / 0.04) 52%,
+    rgb(var(--cursor-heat-rgb) / 0) 76%
+  );
+}
+
+/* Velocity smear: rotated + stretched along the direction of travel */
+.cursor-streak {
+  opacity: 0;
+  width: 130px;
+  height: 30px;
+  background: radial-gradient(
+    ellipse closest-side,
+    rgb(var(--cursor-heat-rgb) / 0.5) 0%,
+    rgb(var(--cursor-heat-rgb) / 0) 72%
+  );
+}
+
+.cursor-spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle closest-side, rgb(var(--cursor-heat-rgb) / 0.8) 0%, rgb(var(--cursor-heat-rgb) / 0) 70%);
+  will-change: transform, opacity;
+}
+
+.cursor-shock {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgb(var(--cursor-heat-rgb) / 0.7);
+  border-radius: 999px;
+  opacity: 0;
+}
+
+/* Normal blend so these stay legible on both themes */
+.cursor-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgb(var(--cursor-heat-rgb) / 0.85);
+  border-radius: 999px;
+  box-shadow:
+    0 0 18px rgb(var(--cursor-heat-rgb) / 0.3),
+    inset 0 0 12px rgb(var(--cursor-heat-rgb) / 0.12);
+  will-change: transform, opacity;
+}
+
+.cursor-core {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgb(var(--cursor-heat-rgb));
+  box-shadow: 0 0 12px 2px rgb(var(--cursor-heat-rgb) / 0.5);
+  will-change: transform, opacity;
+}
+
+.cursor-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.cursor-hud-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border: 1px solid rgb(var(--cursor-heat-rgb) / 0.3);
+  border-radius: 5px;
+}
+
+.cursor-hud-bracket {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 0 solid rgb(var(--cursor-heat-rgb));
+}
+
+.cursor-hud-bracket--tl {
+  top: -1px;
+  left: -1px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.cursor-hud-bracket--tr {
+  top: -1px;
+  right: -1px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+.cursor-hud-bracket--bl {
+  bottom: -1px;
+  left: -1px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+.cursor-hud-bracket--br {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+/* Mono micro-label, matching the site's kicker motif */
+.cursor-hud-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 7px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  white-space: nowrap;
+  color: rgb(var(--cursor-heat-rgb));
+}
+
+.cursor-hud-label--below {
+  top: 100%;
+  bottom: auto;
+  margin-top: 7px;
+  margin-bottom: 0;
+}
+
 /* Reduced motion: kill smooth scroll + transitions */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -98,6 +339,17 @@ a {
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
+  }
+  /* Collapse the cursor to a plain dot: no lag, bloom, smear, trail,
+     shockwave, idle breathing or HUD lock. Following the pointer is the
+     only motion left, and it is unavoidable. */
+  .cursor-pool,
+  .cursor-streak,
+  .cursor-trail,
+  .cursor-shock,
+  .cursor-ring,
+  .cursor-hud {
+    display: none;
   }
 }
 

@@ -20,6 +20,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      data-cursor-label={dark ? "Light mode" : "Dark mode"}
       className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-surface text-primary transition-colors hover:border-accent hover:text-accent"
     >
       {dark ? <Sun className="size-5" /> : <Moon className="size-5" />}
