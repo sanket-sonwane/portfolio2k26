@@ -28,10 +28,10 @@ export function Hero() {
           </motion.div>
           <motion.h1 {...anim(0.08)} className="mt-4 font-semibold tracking-tight">
             <span className="block text-[13vw] leading-[0.9] sm:text-8xl lg:text-[7.5rem]">
-              SONWANE
+              SANKET
             </span>
             <span className="block text-[13vw] leading-[0.9] text-secondary sm:text-8xl lg:text-[7.5rem]">
-              SANKET
+              SONWANE
             </span>
           </motion.h1>
           <motion.p
