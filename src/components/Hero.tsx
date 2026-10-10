@@ -75,7 +75,7 @@ export function Hero() {
             {site.location} · {site.year}
           </motion.p>
         </div>
-        <motion.div {...anim(0.3)} className="h-[460px] lg:h-[500px]">
+        <motion.div {...anim(0.3)} className="h-[460px] min-w-0 lg:h-[500px]">
           <PlaygroundChat />
         </motion.div>
       </div>

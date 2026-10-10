@@ -72,7 +72,7 @@ export function PlaygroundChat() {
     <div
       role="region"
       aria-label="Portfolio AI chat playground"
-      className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background/80 backdrop-blur"
+      className="flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-background/80 backdrop-blur"
     >
       <div className="flex items-center border-b border-border bg-surface/80 px-4 py-2.5">
         <Image
@@ -96,7 +96,7 @@ export function PlaygroundChat() {
       <div
         ref={containerRef}
         aria-live="polite"
-        className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-3 sm:p-4"
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-3 sm:p-4"
       >
         {messages.map((m, i) => {
           const isUser = m.role === "user";
@@ -165,14 +165,14 @@ export function PlaygroundChat() {
         )}
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto px-4 pb-2">
+      <div className="flex flex-wrap gap-1.5 px-4 pb-2">
         {SUGGESTIONS.map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => send(s)}
             data-cursor-label={`Ask: ${s}`}
-            className="shrink-0 rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] whitespace-nowrap text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+            className="rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] text-secondary transition-colors hover:border-accent/30 hover:text-accent"
           >
             {s}
           </button>
