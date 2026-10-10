@@ -162,7 +162,6 @@ a {
 }
 
 .cursor-pool,
-.cursor-streak,
 .cursor-shock {
   position: absolute;
   top: 0;
@@ -191,18 +190,6 @@ a {
     rgb(var(--cursor-heat-rgb) / 0.12) 26%,
     rgb(var(--cursor-heat-rgb) / 0.04) 52%,
     rgb(var(--cursor-heat-rgb) / 0) 76%
-  );
-}
-
-/* Velocity smear: rotated + stretched along the direction of travel */
-.cursor-streak {
-  opacity: 0;
-  width: 130px;
-  height: 30px;
-  background: radial-gradient(
-    ellipse closest-side,
-    rgb(var(--cursor-heat-rgb) / 0.5) 0%,
-    rgb(var(--cursor-heat-rgb) / 0) 72%
   );
 }
 
@@ -340,11 +327,10 @@ a {
   ::view-transition-new(root) {
     animation: none;
   }
-  /* Collapse the cursor to a plain dot: no lag, bloom, smear, trail,
+  /* Collapse the cursor to a plain dot: no lag, bloom, trail,
      shockwave, idle breathing or HUD lock. Following the pointer is the
      only motion left, and it is unavoidable. */
   .cursor-pool,
-  .cursor-streak,
   .cursor-trail,
   .cursor-shock,
   .cursor-ring,

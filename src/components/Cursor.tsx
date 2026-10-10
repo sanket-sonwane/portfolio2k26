@@ -7,8 +7,8 @@ import { CURSOR_TUNING, isLocking, resolveCursorHit, type CursorHit } from "@/li
  * Ignition cursor.
  *
  * The pointer is treated as a physical light source being carried around the
- * page: an additive bloom that lags behind, stretches with velocity, and heats
- * up the faster you move. A targeting HUD snaps onto anything interactive.
+ * page: an additive bloom that lags behind and heats up the faster you move.
+ * A targeting HUD snaps onto anything interactive.
  *
  * Performance notes:
  *  - One `requestAnimationFrame` loop drives every layer, so there are no
@@ -95,7 +95,6 @@ function el<T extends Element>(node: T | null): T {
 export function Cursor() {
   const rootRef = useRef<HTMLDivElement>(null);
   const poolRef = useRef<HTMLDivElement>(null);
-  const streakRef = useRef<HTMLDivElement>(null);
   const trailRef = useRef<HTMLDivElement>(null);
   const shockRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
@@ -107,7 +106,6 @@ export function Cursor() {
   useEffect(() => {
     const root = el(rootRef.current);
     const pool = el(poolRef.current);
-    const streak = el(streakRef.current);
     const trail = el(trailRef.current);
     const shock = el(shockRef.current);
     const ring = el(ringRef.current);
@@ -150,8 +148,6 @@ export function Cursor() {
       const spawn = -400;
       const poolX = new Spring(spawn, T.spring.pool.stiffness, T.spring.pool.damping);
       const poolY = new Spring(spawn, T.spring.pool.stiffness, T.spring.pool.damping);
-      const strX = new Spring(spawn, T.spring.streak.stiffness, T.spring.streak.damping);
-      const strY = new Spring(spawn, T.spring.streak.stiffness, T.spring.streak.damping);
       const hudX = new Spring(spawn, T.spring.hud.stiffness, T.spring.hud.damping);
       const hudY = new Spring(spawn, T.spring.hud.stiffness, T.spring.hud.damping);
 
@@ -167,11 +163,8 @@ export function Cursor() {
       let speed = 0;
       let heat = 0;
       let poolHeat = 0;
-      let angle = 0;
-      let stretch = 1;
       let aperture = 1;
       let ringScale = 1;
-      let ringSquash = 1;
       let ringAlpha = 0;
       let fieldAlpha = 0;
       let hudAlpha = 0;
@@ -197,8 +190,6 @@ export function Cursor() {
           prevY = e.clientY;
           poolX.reset(e.clientX);
           poolY.reset(e.clientY);
-          strX.reset(e.clientX);
-          strY.reset(e.clientY);
           hudX.reset(e.clientX);
           hudY.reset(e.clientY);
           shockT = 1;
@@ -254,14 +245,6 @@ export function Cursor() {
         // deliberately quicker than heating or the glow lingers ~1s after a flick.
         speed = lerp(speed, instant, instant > speed ? 0.4 : 0.11);
 
-        if (travel > 0.4) {
-          const target = (Math.atan2(dy, dx) * 180) / Math.PI;
-          let diff = target - angle;
-          while (diff > 180) diff -= 360;
-          while (diff < -180) diff += 360;
-          angle += diff * 0.22;
-        }
-
         const mode = hit?.mode ?? "free";
         const caret = mode === "caret";
         const muted = mode === "muted";
@@ -283,7 +266,6 @@ export function Cursor() {
 
         const wantRingScale =
           muted ? 0.34 : mode === "node" ? 1.6 : locking && mode !== "media" ? 0.5 : 1;
-        const wantSquash = mode === "text" ? 0.1 : 1;
         const wantRingAlpha = muted
           ? 0.45
           : mode === "node"
@@ -296,7 +278,6 @@ export function Cursor() {
                   ? 0
                   : 1;
         ringScale = lerp(ringScale, wantRingScale, 0.18);
-        ringSquash = lerp(ringSquash, wantSquash, 0.22);
         ringAlpha = lerp(ringAlpha, wantRingAlpha, 0.18);
 
         // ── master alpha ──
@@ -309,8 +290,6 @@ export function Cursor() {
 
         poolX.step(pointerX, dt);
         poolY.step(pointerY, dt);
-        strX.step(pointerX, dt);
-        strY.step(pointerY, dt);
 
         // ── pool ──
         // Painted last-to-hottest: the cool bloom and the trail share this lerp.
@@ -323,24 +302,14 @@ export function Cursor() {
         pool.style.opacity = (fieldAlpha * breathe * (0.82 + poolHeat * 0.5)).toFixed(3);
         pool.style.transform = centered(poolX.value, poolY.value);
 
-        // ── streak ──
-        stretch = lerp(stretch, 1 + Math.min(T.stretchMax, speed / T.stretchAt), 0.14);
+        // ── hot layers ──
         if (Math.abs(heat - paintedHot) > 0.03) {
           const channels = heatChannels(heat);
-          streak.style.setProperty("--cursor-heat-rgb", channels);
           core.style.setProperty("--cursor-heat-rgb", channels);
           ring.style.setProperty("--cursor-heat-rgb", channels);
           hud.style.setProperty("--cursor-heat-rgb", channels);
           paintedHot = heat;
         }
-        const streakAlpha =
-          fieldAlpha * clamp01(speed / (T.stretchAt * 0.6)) * (0.5 + heat * 0.5);
-        streak.style.opacity = streakAlpha.toFixed(3);
-        streak.style.transform = centered(
-          strX.value,
-          strY.value,
-          ` rotate(${angle.toFixed(1)}deg) scale(${stretch.toFixed(3)}, ${(1 / Math.sqrt(stretch)).toFixed(3)})`,
-        );
 
         // ── core + ring ──
         // 1:1, no lag. Precision is the whole point of a cursor.
@@ -350,7 +319,7 @@ export function Cursor() {
         ring.style.transform = centered(
           pointerX,
           pointerY,
-          ` scale(${(ringScale * ringSquash * aperture * breatheRing).toFixed(3)}, ${(ringScale * aperture * breatheRing).toFixed(3)})`,
+          ` scale(${(ringScale * aperture * breatheRing).toFixed(3)}, ${(ringScale * aperture * breatheRing).toFixed(3)})`,
         );
 
         // ── trail ──
@@ -457,7 +426,6 @@ export function Cursor() {
   return (
     <div ref={rootRef} className="cursor-root" aria-hidden>
       <div ref={poolRef} className="cursor-pool" />
-      <div ref={streakRef} className="cursor-streak" />
       <div ref={trailRef} className="cursor-trail" />
       <div ref={shockRef} className="cursor-shock" />
       <div ref={ringRef} className="cursor-ring" />

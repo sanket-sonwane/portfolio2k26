@@ -181,7 +181,6 @@ export const CURSOR_TUNING = {
   /** Spring stiffness / damping per layer. The pool is deliberately molasses. */
   spring: {
     pool: { stiffness: 58, damping: 19 },
-    streak: { stiffness: 150, damping: 22 },
     hud: { stiffness: 340, damping: 30 },
   },
   /** px/sec that saturates the heat ramp. A hard flick hits ~8000, so this sits
@@ -189,10 +188,6 @@ export const CURSOR_TUNING = {
   heatMax: 5200,
   /** px/sec at which the reticle aperture is fully closed. */
   fastAt: 2600,
-  /** px/sec at which the streak reaches full stretch. */
-  stretchAt: 1600,
-  /** Max streak elongation as a multiple of its base width. */
-  stretchMax: 2.7,
   /** Seconds of stillness before the field dims and starts breathing. */
   idleAfter: 2.5,
   trail: {
