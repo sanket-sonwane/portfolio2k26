@@ -5,21 +5,6 @@ export interface PlaygroundProject {
   year: string;
   status: string;
   role: string;
-  stack: string[];
-  links: { repo?: string; demo?: string; backend?: string; paper?: string };
-  metrics: { value: string; label: string }[];
-  overview: string;
-  mechanism: string;
-  takeaway: string;
-}
-
-export interface PlaygroundProject {
-  slug: string;
-  title: string;
-  tagline: string;
-  year: string;
-  status: string;
-  role: string;
   /** Extra match keywords (acronyms, domains) for the chat brain. */
   aliases?: string[];
   stack: string[];

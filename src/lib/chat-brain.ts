@@ -108,6 +108,14 @@ const CONTACT_LINES = [
   `Best way to reach him:\nEmail: ${profile.social.email}\nPhone: ${profile.phone}\nGitHub: ${profile.social.github}\nLinkedIn: ${profile.social.linkedin}`,
 ];
 
+/* ---------------- derived counts ---------------- */
+
+const skillAreaCount = skillCategories.length;
+const skillCount = skillCategories.reduce((n, c) => n + c.skills.length, 0);
+const projectCount = playgroundProjects.length;
+const internshipCount = playgroundExperience.filter((e) => e.role.toLowerCase().includes("intern")).length;
+const leadershipCount = playgroundExperience.length - internshipCount;
+
 /* ---------------- builders ---------------- */
 
 function buildSkillsAnswers(): string[] {
@@ -116,7 +124,7 @@ function buildSkillsAnswers(): string[] {
     .join("\n");
   const flat = skillCategories.flatMap((c) => c.skills.map((s) => s.name)).join(", ");
   return [
-    `Sanket works across 5 areas and 34 skills:\n${catLines}\nAsk about any skill — try "rag", "langgraph", or "react".`,
+    `Sanket works across ${skillAreaCount} areas and ${skillCount} skills:\n${catLines}\nAsk about any skill — try "rag", "langgraph", or "react".`,
     `His stack in one line: ${flat}.`,
   ];
 }
@@ -126,7 +134,7 @@ function buildProjectsAnswers(): string[] {
     .map((p, i) => `${i + 1}. ${p.title} (${p.year}) — ${p.tagline}`)
     .join("\n");
   return [
-    `10 things Sanket has built:\n${list}\nAsk for a deep-dive — e.g. "acg", "qa forge", "visionmitra", or "tattvaquest".`,
+    `${projectCount} things Sanket has built:\n${list}\nAsk for a deep-dive — e.g. "acg", "qa forge", "visionmitra", or "tattvaquest".`,
     `Flagships: ACG (agentic commerce with real Razorpay payments + interop certification), QA-Forge (live multi-agent auditor), NemotronGuard (98% 5G detection), VisionMitra (sub-second YOLOv8 alerts), and the EPIC Municipal Copilot (RAG over millions of records). Which one do you want unpacked?`,
   ];
 }
@@ -136,7 +144,7 @@ function buildExperienceAnswers(): string[] {
     .map((e) => `• ${e.role}, ${e.company} (${e.period}) — ${e.achievements[0]}`)
     .join("\n");
   return [
-    `3 internships + 1 leadership role:\n${lines}`,
+    `${internshipCount} internships + ${leadershipCount} leadership role:\n${lines}`,
     `From research (COEP) to industrial automation (ARAI) to Agentic AI (EPIC) — plus leading placements as TPC Head at PVPIT.`,
   ];
 }
@@ -251,7 +259,7 @@ const greetingAnswers = [
 ];
 
 const statusAnswers = [
-  `All systems nominal. 10 projects indexed, 34 skills loaded, 0 hallucinations detected. What do you want to know?`,
+  `All systems nominal. ${projectCount} projects indexed, ${skillCount} skills loaded, 0 hallucinations detected. What do you want to know?`,
 ];
 
 const thanksAnswers = [
@@ -265,7 +273,7 @@ const byeAnswers = [
 ];
 
 const resumeAnswers = [
-  `Resume snapshot: 3 internships (COEP research, ARAI automation, EPIC Agentic AI), 99.94% processing-time cut, 98% detection accuracy, 100+ weekly users on Class-Node. Full PDF: /resume — or email ${profile.social.email}.`,
+  `Resume snapshot: 3 internships (COEP research, ARAI automation, EPIC Agentic AI), 99.94% processing-time cut, 98% detection accuracy, 100+ weekly users on Class-Node. Full PDF: /resume.pdf — or email ${profile.social.email}.`,
 ];
 
 const hireAnswers = [
@@ -279,10 +287,10 @@ const helpAnswers = [
 /* ---------------- intent table ---------------- */
 
 const baseIntents: ChatIntent[] = [
-  { id: "greetings", keywords: ["hello", "hey", "ok"], phrases: ["good morning", "good afternoon", "good evening"], answers: greetingAnswers },
+  { id: "greetings", keywords: ["hi", "hello", "hey", "ok"], phrases: ["good morning", "good afternoon", "good evening"], answers: greetingAnswers },
   { id: "status", keywords: ["status", "working", "alive", "uptime"], phrases: ["are you working", "are you there", "system status"], answers: statusAnswers },
-  { id: "who", keywords: ["sanket", "who", "name", "person", "founder", "himself"], phrases: ["who are you", "who is sanket", "about sanket", "introduce yourself"], answers: whoAnswers },
-  { id: "whatdo", keywords: ["work", "does", "build", "role", "job", "engineer"], phrases: ["what does he do", "what do you do", "what does sanket do"], answers: doAnswers },
+  { id: "who", keywords: ["sanket", "who", "name", "person", "founder", "himself"], phrases: ["who are you", "who is sanket", "who is he", "about sanket", "introduce yourself"], answers: whoAnswers },
+  { id: "whatdo", keywords: ["does", "build", "role", "job", "engineer"], phrases: ["what does he do", "what do you do", "what does sanket do"], answers: doAnswers },
   {
     id: "skills",
     keywords: ["skill", "skills", "skilz", "skils", "skillz", "stack", "tech", "technologies", "tools", "toolset", "expertise"],
@@ -301,7 +309,7 @@ const baseIntents: ChatIntent[] = [
   { id: "research", keywords: ["research", "paper", "aeue", "journal", "publication", "q2", "rogue", "mec", "5g", "sdn", "detection"], phrases: ["his research", "tell me about research", "research paper"], answers: researchAnswers },
   {
     id: "achievements",
-    keywords: ["achievement", "achievements", "achivments", "acheivements", "award", "awards", "nvidia", "nemotron", "workshop", "tpc", "hackerrank", "host", "events"],
+    keywords: ["achievement", "achievements", "achivments", "acheivements", "award", "awards", "nvidia", "nemotron", "workshop", "hackerrank", "host", "events"],
     phrases: ["his achievements", "any awards", "tell me about nvidia"],
     answers: buildAchievementsAnswers(),
   },
@@ -310,7 +318,7 @@ const baseIntents: ChatIntent[] = [
   { id: "resume", keywords: ["resume", "cv", "pdf", "download"], phrases: ["his resume", "download resume", "send resume"], answers: resumeAnswers },
   { id: "hire", keywords: ["hire", "hiring", "job", "jobs", "opportunity", "freelance", "employ", "recruit"], phrases: ["why hire him", "hire sanket", "open to work"], answers: hireAnswers },
   { id: "location", keywords: ["location", "based", "city", "pune", "hyderabad", "bangalore", "remote", "relocate", "live"], phrases: ["where is he based", "where does he live"], answers: locationAnswers },
-  { id: "hobbies", keywords: ["hobby", "hobbies", "interests", "fun", "free", "community", "events"], phrases: ["what are his hobbies", "outside work", "free time"], answers: hobbiesAnswers },
+  { id: "hobbies", keywords: ["hobby", "hobbies", "interests", "fun", "free", "community"], phrases: ["what are his hobbies", "outside work", "free time"], answers: hobbiesAnswers },
   { id: "bot", keywords: ["bot", "assistant", "ai", "model", "llm", "chatbot", "robot"], phrases: ["what are you", "are you ai", "how do you work"], answers: botAnswers },
   { id: "thanks", keywords: ["thanks", "thank", "great", "awesome", "nice", "cool", "helpful"], phrases: ["thank you", "thanks a lot"], answers: thanksAnswers },
   { id: "bye", keywords: ["bye", "goodbye", "later", "cya", "goodnight"], phrases: ["see you", "good bye"], answers: byeAnswers },
@@ -356,7 +364,7 @@ export function matchIntent(raw: string): MatchResult | null {
 
     for (const kw of intent.keywords) {
       const nk = normalizeText(kw);
-      if (!nk || STOPWORDS.has(nk)) continue;
+      if (!nk) continue;
       const kws = nk.split(" ").filter(Boolean);
 
       // Multi-word keyword (e.g. "qa forge", "hybrid rag")
@@ -374,12 +382,17 @@ export function matchIntent(raw: string): MatchResult | null {
         continue;
       }
 
+      // Stopwords are usually dropped as noise, but a keyword like "hi", "who"
+      // or "does" is still a real trigger. Match it exactly, at a lower weight
+      // than substantive keywords so it can never beat a content match.
+      const isStop = STOPWORDS.has(nk);
       if (tokens.includes(nk)) {
-        score += 14;
+        score += isStop ? 6 : 14;
         continue;
       }
+      if (isStop) continue;
       if (nk.length >= 4) {
-        if (pool.some((t) => t.startsWith(nk) || nk.startsWith(t))) score += 8;
+        if (pool.some((t) => t.length >= 4 && (t.startsWith(nk) || nk.startsWith(t)))) score += 8;
       }
       for (const t of pool) {
         if (t.length < 3 || nk.length < 3) continue;

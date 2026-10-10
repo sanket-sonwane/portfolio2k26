@@ -22,12 +22,6 @@ const SUGGESTIONS = [
   "contact",
 ];
 
-function nextIndex(ref: React.MutableRefObject<number>, len: number): number {
-  const i = ref.current % len;
-  ref.current += 1;
-  return i;
-}
-
 const GREETING: Message = {
   role: "assistant",
   text: "Hi! I'm an AI assistant for Sanket's portfolio. Ask me anything about his work, skills, or experience.",
@@ -43,7 +37,7 @@ export function PlaygroundChat() {
   const [thinking, setThinking] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const answerCursor = useRef(0);
+  const answerCursors = useRef<Record<string, number>>({});
 
   useEffect(() => {
     const el = containerRef.current;
@@ -56,12 +50,17 @@ export function PlaygroundChat() {
     setMessages((m) => [...m, { role: "user", text }]);
     setInput("");
     setThinking(true);
-    track("playground_asked", { matched: "pending" });
     setTimeout(() => {
       const result = matchIntent(text);
-      const reply = result
-        ? result.intent.answers[nextIndex(answerCursor, result.intent.answers.length)]
-        : fallbackReply(text);
+      let reply: string;
+      if (result) {
+        const { id, answers } = result.intent;
+        const i = answerCursors.current[id] ?? 0;
+        reply = answers[i % answers.length];
+        answerCursors.current[id] = i + 1;
+      } else {
+        reply = fallbackReply(text);
+      }
       track("playground_asked", { matched: result ? result.intent.id : "fallback" });
       setMessages((m) => [...m, { role: "assistant", text: reply }]);
       setThinking(false);
@@ -166,21 +165,19 @@ export function PlaygroundChat() {
         )}
       </div>
 
-      {messages.length < 3 && (
-        <div className="flex flex-wrap gap-1.5 px-4 pb-2">
-          {SUGGESTIONS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => send(s)}
-              data-cursor-label={`Ask: ${s}`}
-              className="rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] text-secondary transition-colors hover:border-accent/30 hover:text-accent"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="flex gap-1.5 overflow-x-auto px-4 pb-2">
+        {SUGGESTIONS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => send(s)}
+            data-cursor-label={`Ask: ${s}`}
+            className="shrink-0 rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] whitespace-nowrap text-secondary transition-colors hover:border-accent/30 hover:text-accent"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
 
       <div className="border-t border-border p-3">
         <div className="flex gap-2">
