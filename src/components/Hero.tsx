@@ -6,6 +6,7 @@ import Link from "next/link";
 import { site, track } from "@/lib/site";
 import { GreetingRotator } from "./GreetingRotator";
 import { PlaygroundChat } from "./PlaygroundChat";
+import { TalkToSara } from "./TalkToSara";
 
 export function Hero() {
   const reduce = useReducedMotion();
@@ -67,6 +68,7 @@ export function Hero() {
             >
               GitHub <ArrowUpRight className="size-4" />
             </a>
+            <TalkToSara />
           </motion.div>
           <motion.p
             {...anim(0.38)}
